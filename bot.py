@@ -17,5 +17,43 @@ async def on_ready():
   
   print("봇 이름:",client.user.name,"봇 아이디:",client.user.id,"봇 버전:",discord.__version__)
 
+  
+ @client.event
+ module.exports = {
+    name:"티켓",
+    async execute(message){
+        if(message.channel.type !== "GUILD_TEXT") return
+        const channel = await message.guild.channels.create('TIKET : ${message.author.tag}')
+        message.delete()
+
+        channel.permissionOverwrites.edit(message.guild.id , {
+            SEND_MESSAGES : false,
+            VIEW_CHANNEL: false
+        })
+
+        channel.permissionOverwrites.edit(message.author,{
+            VIEW_CHANNEL:true,
+            SEND_MESSAGES:true
+        })
+        const msg = await message.reply('**아래 채널로 이동해주세요! ${channel}**')
+        const reactionmsg = await channel.send('**문의하실 내용을 적어주세요 !**')
+
+        await reactionmsg.react("❌")
+
+        const collector = reactionmsg.createReactionCollector()
+
+        collector.on("collect", (reaction,user)=>{
+            switch(reaction.emoji.name){
+                case "❌" :
+                channel.send("**채널이 3초뒤 삭제됩니다**")
+                setTimeout(() => { channel.delete() }, 3000);
+                setTimeout(() => { msg.delete() }, 3000);
+                break;
+
+                
+            }
+        })
+    }
+}            
 
 client.run(os.environ['token'])
